@@ -23,6 +23,7 @@ import android.content.Context
 import android.content.SharedPreferences
 import androidx.room.Room
 import com.swordfish.lemuroid.app.mobile.feature.game.GameActivity
+import com.swordfish.lemuroid.app.rayneo.RayNeoGameActivity
 import com.swordfish.lemuroid.app.mobile.feature.game.GameService
 import com.swordfish.lemuroid.app.mobile.feature.gamemenu.GameMenuActivity
 import com.swordfish.lemuroid.app.mobile.feature.input.GamePadBindingActivity
@@ -103,6 +104,10 @@ abstract class LemuroidApplicationModule {
     @PerActivity
     @ContributesAndroidInjector
     abstract fun gameActivity(): GameActivity
+
+    @PerActivity
+    @ContributesAndroidInjector
+    abstract fun rayNeoGameActivity(): RayNeoGameActivity
 
     @ContributesAndroidInjector
     abstract fun gameService(): GameService

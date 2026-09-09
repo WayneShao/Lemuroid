@@ -37,9 +37,15 @@ class StorageFrameworkPickerLauncher : RetrogradeActivity() {
     }
 
     private fun showStorageAccessFrameworkNotSupportedDialog() {
-        val message = getString(R.string.dialog_saf_not_found, directoriesManager.getInternalRomsDirectory())
-        val actionLabel = getString(R.string.ok)
-        displayErrorDialog(message, actionLabel) { finish() }
+        // SAF is not available on this device (e.g. RayNeo X3 Pro has no DocumentsUI).
+        // SAF is not available on this device (e.g. RayNeo X3 Pro has no DocumentsUI).
+        // Fall back to the legacy file-path provider pointing at /sdcard/Games,
+        // which is accessible via MANAGE_EXTERNAL_STORAGE.
+        val sharedPreferences = SharedPreferencesHelper.getLegacySharedPreferences(this)
+        val legacyKey = getString(com.swordfish.lemuroid.lib.R.string.pref_key_legacy_external_folder)
+        sharedPreferences.edit().putString(legacyKey, "/sdcard/Games").apply()
+        startLibraryIndexWork()
+        finish()
     }
 
     override fun onActivityResult(

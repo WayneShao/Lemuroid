@@ -3,7 +3,11 @@ package com.swordfish.lemuroid.app.mobile.feature.main
 import android.app.Activity
 import android.content.Intent
 import android.graphics.Color
+import android.net.Uri
+import android.os.Build
 import android.os.Bundle
+import android.os.Environment
+import android.provider.Settings
 import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -114,6 +118,8 @@ class MainActivity : RetrogradeComponentActivity(), BusyActivity {
             SystemBarStyle.dark(Color.TRANSPARENT),
         )
         super.onCreate(savedInstanceState)
+
+        requestManageExternalStorageIfNeeded()
 
         GlobalScope.safeLaunch {
             reviewManager.initialize(applicationContext)
@@ -373,6 +379,20 @@ class MainActivity : RetrogradeComponentActivity(), BusyActivity {
                     onDismissRequest = { infoDialogDisplayed.value = false },
                     confirmButton = { },
                 )
+            }
+        }
+    }
+
+    private fun requestManageExternalStorageIfNeeded() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && !Environment.isExternalStorageManager()) {
+            try {
+                val intent = Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION).apply {
+                    data = Uri.parse("package:$packageName")
+                }
+                startActivity(intent)
+            } catch (e: Exception) {
+                // Settings activity not available on this device (e.g. RayNeo X3 Pro).
+                // Grant manually: adb shell appops set <package> MANAGE_EXTERNAL_STORAGE allow
             }
         }
     }

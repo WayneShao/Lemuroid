@@ -24,6 +24,8 @@ import com.swordfish.lemuroid.app.shared.game.viewmodel.GameViewModelSideEffects
 import com.swordfish.lemuroid.app.shared.input.InputDeviceManager
 import com.swordfish.lemuroid.app.shared.rumble.RumbleManager
 import com.swordfish.lemuroid.app.shared.settings.ControllerConfigsManager
+import com.swordfish.lemuroid.app.rayneo.RayNeoDeviceUtils
+import com.swordfish.lemuroid.app.rayneo.RayNeoGameActivity
 import com.swordfish.lemuroid.app.tv.game.TVGameActivity
 import com.swordfish.lemuroid.common.animationDuration
 import com.swordfish.lemuroid.common.coroutines.launchOnState
@@ -441,10 +443,10 @@ abstract class BaseGameActivity : ImmersiveActivity() {
             useLeanback: Boolean,
         ) {
             val gameActivity =
-                if (useLeanback) {
-                    TVGameActivity::class.java
-                } else {
-                    GameActivity::class.java
+                when {
+                    RayNeoDeviceUtils.isRayNeoDevice() -> RayNeoGameActivity::class.java
+                    useLeanback -> TVGameActivity::class.java
+                    else -> GameActivity::class.java
                 }
             activity.startActivityForResult(
                 Intent(activity, gameActivity).apply {

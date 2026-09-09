@@ -19,6 +19,7 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="com.android.providers.tv.permission.WRITE_EPG_DATA" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
@@ -38,6 +39,11 @@
         android:roundIcon="@mipmap/lemuroid_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/LemuroidMaterialTheme">
+
+        <!-- RayNeo Mercury launcher registration -->
+        <meta-data
+            android:name="com.rayneo.mercury.app"
+            android:value="true" />
         <activity
             android:name="com.swordfish.lemuroid.app.mobile.feature.main.MainActivity"
             android:exported="true">
@@ -65,6 +71,15 @@
         <activity
             android:name="com.swordfish.lemuroid.app.mobile.feature.game.GameActivity"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden|mnc|colorMode|density|fontScale|fontWeightAdjustment|keyboard|layoutDirection|locale|mcc|navigation|smallestScreenSize|touchscreen|uiMode"
+            android:process=":game"
+            android:theme="@style/LemuroidMaterialTheme.Game" />
+
+        <!-- RayNeo X3 Pro dual-eye game activity -->
+        <activity
+            android:name="com.swordfish.lemuroid.app.rayneo.RayNeoGameActivity"
+            android:configChanges="orientation|screenSize|screenLayout|keyboardHidden|mnc|colorMode|density|fontScale|fontWeightAdjustment|keyboard|layoutDirection|locale|mcc|navigation|smallestScreenSize|touchscreen|uiMode"
+            android:launchMode="singleTask"
+            android:screenOrientation="landscape"
             android:process=":game"
             android:theme="@style/LemuroidMaterialTheme.Game" />
 
