@@ -11,6 +11,7 @@ The user reports that the March adaptation reached an initial working state. The
 - APK package: `com.swordfish.lemuroid.debug`, version `1.17.0-DEBUG`.
 - Signing certificate SHA-256: `ce3ebf1d972c09583470e184d9b86edd20eb4679fedc632d31ac9f58e8741fc8`, matching the March APK.
 - APK SHA-256: `619b96bff4bb6b6367dd9495bab77b33d13a784f0eacc561ac20b0965114effa`.
+- The independent Linux [GitHub Actions run](https://github.com/WayneShao/Lemuroid/actions/runs/34306900642) passed all configured checks and uploaded the APK plus reports. It tested implementation commit `22c83e3b`; the following handoff/feasibility commits change documentation only.
 
 ## Device observations
 
@@ -46,3 +47,5 @@ Indexed test file:
 ## Remaining hardware acceptance
 
 Rendered screenshots do not establish physical temple gesture behavior, actual Bluetooth controller binding, eye-to-eye phase alignment or performance across emulator cores. The source changes route the context menu and binding dialogs through the shared modal entry point; those interactions require their own device checks. No universal 640×480 virtual-display solution or performance claim is made by this migration.
+
+The ROM was indexed, but an actual running emulator frame was not confirmed during this session. Further launch checks were interrupted by device transport resets. Gameplay, physical-input acceptance and long-session performance remain pending.
