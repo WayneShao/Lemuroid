@@ -1,5 +1,7 @@
 # Lemuroid
 
+This fork maintains a **RayNeo X3 Pro adaptation** on the `rayneo` branch. See [RayNeo setup, architecture and maintenance](RAYNEO.md) and the reusable [Android porting skill](skills/porting-rayneo-android-apps/SKILL.md). The original upstream project description follows.
+
 [<img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png"
      alt="Get it on F-Droid"
      height="80">](https://f-droid.org/packages/com.swordfish.lemuroid/)

@@ -4,6 +4,7 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.PixelFormat
+import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.view.Choreographer
@@ -18,13 +19,12 @@ import timber.log.Timber
  *
  * This is the "right eye" of the dual-eye display. The "left eye" is the GLRetroView itself.
  *
- * PixelCopy works directly on SurfaceView subclasses (API 26+) and synchronises with
- * the GPU surface presentation, so no additional synchronisation is needed.
+ * PixelCopy copies SurfaceView content asynchronously; the source and destination have
+ * separate presentation lifetimes.
  *
- * The typical latency is ~1 frame, which is imperceptible for 2D game content.
+ * Copy cost and the phase difference between eyes require device measurements.
  */
 class RayNeoMirrorView(context: Context) : SurfaceView(context), Choreographer.FrameCallback {
-
     private val mainHandler = Handler(Looper.getMainLooper())
     private var sourceView: GLRetroView? = null
     private var mirrorBitmap: Bitmap? = null
@@ -56,6 +56,10 @@ class RayNeoMirrorView(context: Context) : SurfaceView(context), Choreographer.F
 
     override fun doFrame(frameTimeNanos: Long) {
         if (!running) return
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+            detachSource()
+            return
+        }
 
         val source = sourceView
         if (source == null || !source.isAttachedToWindow || copyPending) {
@@ -93,7 +97,10 @@ class RayNeoMirrorView(context: Context) : SurfaceView(context), Choreographer.F
 
     // --- Private helpers ---
 
-    private fun getOrCreateBitmap(w: Int, h: Int): Bitmap {
+    private fun getOrCreateBitmap(
+        w: Int,
+        h: Int,
+    ): Bitmap {
         val existing = mirrorBitmap
         if (existing != null && existing.width == w && existing.height == h) return existing
         existing?.recycle()

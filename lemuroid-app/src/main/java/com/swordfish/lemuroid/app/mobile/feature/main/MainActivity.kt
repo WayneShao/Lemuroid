@@ -3,18 +3,15 @@ package com.swordfish.lemuroid.app.mobile.feature.main
 import android.app.Activity
 import android.content.Intent
 import android.graphics.Color
-import android.net.Uri
-import android.os.Build
 import android.os.Bundle
-import android.os.Environment
-import android.provider.Settings
 import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.AlertDialog
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
@@ -79,6 +76,7 @@ import de.charlex.compose.material3.HtmlText
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import javax.inject.Inject
+import com.swordfish.lemuroid.app.mobile.shared.compose.ui.LemuroidAlertDialog as AlertDialog
 
 @OptIn(DelicateCoroutinesApi::class)
 class MainActivity : RetrogradeComponentActivity(), BusyActivity {
@@ -118,8 +116,6 @@ class MainActivity : RetrogradeComponentActivity(), BusyActivity {
             SystemBarStyle.dark(Color.TRANSPARENT),
         )
         super.onCreate(savedInstanceState)
-
-        requestManageExternalStorageIfNeeded()
 
         GlobalScope.safeLaunch {
             reviewManager.initialize(applicationContext)
@@ -375,24 +371,10 @@ class MainActivity : RetrogradeComponentActivity(), BusyActivity {
                     }
 
                 AlertDialog(
-                    text = { HtmlText(text = message) },
+                    text = { HtmlText(text = message, modifier = Modifier.verticalScroll(rememberScrollState())) },
                     onDismissRequest = { infoDialogDisplayed.value = false },
                     confirmButton = { },
                 )
-            }
-        }
-    }
-
-    private fun requestManageExternalStorageIfNeeded() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && !Environment.isExternalStorageManager()) {
-            try {
-                val intent = Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION).apply {
-                    data = Uri.parse("package:$packageName")
-                }
-                startActivity(intent)
-            } catch (e: Exception) {
-                // Settings activity not available on this device (e.g. RayNeo X3 Pro).
-                // Grant manually: adb shell appops set <package> MANAGE_EXTERNAL_STORAGE allow
             }
         }
     }

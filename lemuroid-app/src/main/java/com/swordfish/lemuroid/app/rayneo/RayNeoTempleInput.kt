@@ -33,7 +33,7 @@ class RayNeoTempleInput(
         if (!isTempleDevice(device.name)) return false
 
         assignDeviceIfNeeded(ev.deviceId)
-        if (ev.deviceId == leftDeviceId) return false  // let system handle left lens
+        if (ev.deviceId == leftDeviceId) return false // let system handle left lens
 
         return handleRightLens(ev)
     }

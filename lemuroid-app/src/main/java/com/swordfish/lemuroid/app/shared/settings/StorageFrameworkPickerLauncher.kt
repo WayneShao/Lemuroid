@@ -6,6 +6,8 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import com.swordfish.lemuroid.R
+import com.swordfish.lemuroid.app.rayneo.RayNeoDeviceUtils
+import com.swordfish.lemuroid.app.rayneo.RayNeoStorageActivity
 import com.swordfish.lemuroid.app.shared.library.LibraryIndexScheduler
 import com.swordfish.lemuroid.app.utils.android.displayErrorDialog
 import com.swordfish.lemuroid.lib.android.RetrogradeActivity
@@ -37,15 +39,14 @@ class StorageFrameworkPickerLauncher : RetrogradeActivity() {
     }
 
     private fun showStorageAccessFrameworkNotSupportedDialog() {
-        // SAF is not available on this device (e.g. RayNeo X3 Pro has no DocumentsUI).
-        // SAF is not available on this device (e.g. RayNeo X3 Pro has no DocumentsUI).
-        // Fall back to the legacy file-path provider pointing at /sdcard/Games,
-        // which is accessible via MANAGE_EXTERNAL_STORAGE.
-        val sharedPreferences = SharedPreferencesHelper.getLegacySharedPreferences(this)
-        val legacyKey = getString(com.swordfish.lemuroid.lib.R.string.pref_key_legacy_external_folder)
-        sharedPreferences.edit().putString(legacyKey, "/sdcard/Games").apply()
-        startLibraryIndexWork()
-        finish()
+        if (RayNeoDeviceUtils.isRayNeoDevice()) {
+            startActivity(Intent(this, RayNeoStorageActivity::class.java))
+            finish()
+        } else {
+            val message = getString(R.string.dialog_saf_not_found, directoriesManager.getInternalRomsDirectory())
+            val actionLabel = getString(R.string.ok)
+            displayErrorDialog(message, actionLabel) { finish() }
+        }
     }
 
     override fun onActivityResult(
@@ -67,6 +68,9 @@ class StorageFrameworkPickerLauncher : RetrogradeActivity() {
 
                 sharedPreferences.edit().apply {
                     this.putString(preferenceKey, newValue.toString())
+                    if (RayNeoDeviceUtils.isRayNeoDevice()) {
+                        remove(getString(com.swordfish.lemuroid.lib.R.string.pref_key_legacy_external_folder))
+                    }
                     this.apply()
                 }
             }

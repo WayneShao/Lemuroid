@@ -22,7 +22,7 @@ import com.swordfish.libretrodroid.GLRetroView
  * No on-screen touch controls are shown — the user is expected to use a
  * Bluetooth gamepad (Xbox, PS, etc.), which Lemuroid already supports natively.
  *
- * Mirror lens touch gestures (pause / menu) are handled in RayNeoGameActivity.
+ * The right-eye back gesture is installed by DualEyeActivityWrapper.
  */
 @Composable
 fun RayNeoGameScreen(viewModel: BaseGameScreenViewModel) {
@@ -33,12 +33,12 @@ fun RayNeoGameScreen(viewModel: BaseGameScreenViewModel) {
     val mirrorViewRef = remember { arrayOfNulls<RayNeoMirrorView>(1) }
 
     Row(modifier = Modifier.fillMaxSize()) {
-
         // ── Left eye: GLRetroView ────────────────────────────────────────────────
         AndroidView(
-            modifier = Modifier
-                .weight(1f)
-                .fillMaxHeight(),
+            modifier =
+                Modifier
+                    .weight(1f)
+                    .fillMaxHeight(),
             factory = { context ->
                 viewModel.createRetroView(context, lifecycle).also { view ->
                     retroViewRef[0] = view
@@ -54,9 +54,10 @@ fun RayNeoGameScreen(viewModel: BaseGameScreenViewModel) {
 
         // ── Right eye: PixelCopy mirror ──────────────────────────────────────────
         AndroidView(
-            modifier = Modifier
-                .weight(1f)
-                .fillMaxHeight(),
+            modifier =
+                Modifier
+                    .weight(1f)
+                    .fillMaxHeight(),
             factory = { context ->
                 RayNeoMirrorView(context).also { view ->
                     mirrorViewRef[0] = view

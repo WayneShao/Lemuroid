@@ -14,15 +14,17 @@ import android.widget.FrameLayout
  * In hardware-accelerated mode Android records child draw operations into
  * RenderNodes (GPU display lists). The second [super.dispatchDraw] call simply
  * replays those already-recorded display lists; no re-execution of draw code
- * and no CPU readback are needed. This is the highest-performance way to
- * duplicate View-hierarchy content on Android.
+ * and no CPU bitmap readback is needed. This keeps a single View hierarchy
+ * and a single set of UI state; independent windows still need their own wrapper.
  *
  * Does NOT work for SurfaceView / GLSurfaceView children — those bypass the
  * View canvas system entirely. The game screen (GLRetroView) is handled
  * separately via RayNeoGameActivity + RayNeoGameScreen + RayNeoMirrorView.
  */
-class DualEyeLayout(context: Context) : FrameLayout(context) {
-
+class DualEyeLayout(
+    context: Context,
+    private val eyeWidth: Int = SINGLE_EYE_WIDTH,
+) : FrameLayout(context) {
     /**
      * Mercury sends mirror-lens gestures as mouse/pointer events at x ≥ 640
      * (the right-eye region). Since our content is constrained to 640 px,
@@ -30,18 +32,24 @@ class DualEyeLayout(context: Context) : FrameLayout(context) {
      * Remap them to the equivalent left-eye coordinate so they reach the child.
      */
     override fun dispatchTouchEvent(ev: MotionEvent): Boolean {
-        remapToLeftEyeIfNeeded(ev)
-        return super.dispatchTouchEvent(ev)
+        return dispatchToLeftEye(ev) { super.dispatchTouchEvent(it) }
     }
 
     override fun dispatchGenericMotionEvent(ev: MotionEvent): Boolean {
-        remapToLeftEyeIfNeeded(ev)
-        return super.dispatchGenericMotionEvent(ev)
+        return dispatchToLeftEye(ev) { super.dispatchGenericMotionEvent(it) }
     }
 
-    private fun remapToLeftEyeIfNeeded(ev: MotionEvent) {
-        if (ev.x >= SINGLE_EYE_WIDTH) {
-            ev.offsetLocation(-SINGLE_EYE_WIDTH.toFloat(), 0f)
+    private inline fun dispatchToLeftEye(
+        ev: MotionEvent,
+        dispatch: (MotionEvent) -> Boolean,
+    ): Boolean {
+        if (ev.x < eyeWidth) return dispatch(ev)
+        val mappedEvent = MotionEvent.obtain(ev)
+        try {
+            mappedEvent.offsetLocation(-eyeWidth.toFloat(), 0f)
+            return dispatch(mappedEvent)
+        } finally {
+            mappedEvent.recycle()
         }
     }
 
@@ -51,7 +59,7 @@ class DualEyeLayout(context: Context) : FrameLayout(context) {
 
         // Right eye — translate and replay the same RenderNode display lists
         canvas.save()
-        canvas.translate(SINGLE_EYE_WIDTH.toFloat(), 0f)
+        canvas.translate(eyeWidth.toFloat(), 0f)
         super.dispatchDraw(canvas)
         canvas.restore()
     }

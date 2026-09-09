@@ -15,8 +15,10 @@ import timber.log.Timber
  * manages its own right-eye mirror via RayNeoMirrorView + PixelCopy.
  */
 class DualEyeActivityWrapper : Application.ActivityLifecycleCallbacks {
-
-    override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) {
+    override fun onActivityCreated(
+        activity: Activity,
+        savedInstanceState: Bundle?,
+    ) {
         activity.window.decorView.post {
             if (activity is RayNeoGameActivity) {
                 // Game screen manages its own dual-eye rendering (GLRetroView + PixelCopy).
@@ -29,8 +31,9 @@ class DualEyeActivityWrapper : Application.ActivityLifecycleCallbacks {
     }
 
     private fun addRightEyeOverlayOnly(activity: Activity) {
-        val contentFrame = activity.window.decorView
-            .findViewById<FrameLayout>(android.R.id.content) ?: return
+        val contentFrame =
+            activity.window.decorView
+                .findViewById<FrameLayout>(android.R.id.content) ?: return
         // Avoid duplicating the overlay on config changes
         if (contentFrame.findViewWithTag<RightEyeGestureOverlay>("right_eye_overlay") != null) return
         val rightEyeOverlay = RightEyeGestureOverlay(activity).apply { tag = "right_eye_overlay" }
@@ -44,13 +47,14 @@ class DualEyeActivityWrapper : Application.ActivityLifecycleCallbacks {
     }
 
     private fun wrapWithDualEye(activity: Activity) {
-        val contentFrame = activity.window.decorView
-            .findViewById<FrameLayout>(android.R.id.content) ?: return
+        val contentFrame =
+            activity.window.decorView
+                .findViewById<FrameLayout>(android.R.id.content) ?: return
 
         if (contentFrame.childCount == 0) return
 
         val child = contentFrame.getChildAt(0)
-        if (child is DualEyeLayout) return  // already wrapped (e.g. after config change)
+        if (child is DualEyeLayout) return // already wrapped (e.g. after config change)
 
         Timber.d("DualEyeActivityWrapper: wrapping ${activity.javaClass.simpleName}")
 
@@ -78,9 +82,17 @@ class DualEyeActivityWrapper : Application.ActivityLifecycleCallbacks {
     }
 
     override fun onActivityStarted(activity: Activity) {}
+
     override fun onActivityResumed(activity: Activity) {}
+
     override fun onActivityPaused(activity: Activity) {}
+
     override fun onActivityStopped(activity: Activity) {}
-    override fun onActivitySaveInstanceState(activity: Activity, outState: Bundle) {}
+
+    override fun onActivitySaveInstanceState(
+        activity: Activity,
+        outState: Bundle,
+    ) {}
+
     override fun onActivityDestroyed(activity: Activity) {}
 }

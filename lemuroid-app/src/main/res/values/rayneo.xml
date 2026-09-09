@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="rayneo_storage_title">Game directory access</string>
+    <string name="rayneo_storage_permission_required">Allow access to all files to read games from this directory. Return here after granting permission to start scanning.</string>
+    <string name="rayneo_storage_directory_unavailable">This directory could not be opened or created. Check the path and storage access, then retry. Your directory selection has not changed.</string>
+    <string name="rayneo_storage_settings_unavailable">The system permission page did not open. Grant file access from a connected computer, then return here and check again.</string>
+    <string name="rayneo_storage_grant">Grant access</string>
+    <string name="rayneo_storage_retry">Check again</string>
+</resources>

@@ -18,6 +18,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeContent
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AppShortcut
 import androidx.compose.material.icons.filled.Favorite
@@ -42,8 +44,10 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.swordfish.lemuroid.R
+import com.swordfish.lemuroid.app.mobile.shared.compose.ui.LemuroidAlertDialog
 import com.swordfish.lemuroid.app.mobile.shared.compose.ui.LemuroidGameTexts
 import com.swordfish.lemuroid.app.mobile.shared.compose.ui.LemuroidSmallGameImage
+import com.swordfish.lemuroid.app.rayneo.RayNeoDeviceUtils
 import com.swordfish.lemuroid.lib.library.db.entity.Game
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -60,6 +64,7 @@ fun MainGameContextActions(
     val selectedGame = selectedGameState.value
 
     LaunchedEffect(selectedGame) {
+        if (RayNeoDeviceUtils.isRayNeoDevice()) return@LaunchedEffect
         if (selectedGame != null) {
             modalSheetState.show()
         } else {
@@ -68,19 +73,39 @@ fun MainGameContextActions(
     }
 
     if (selectedGame != null) {
-        ModalBottomSheet(
-            sheetState = modalSheetState,
-            onDismissRequest = { selectedGameState.value = null },
-        ) {
-            ContextActionContent(
-                selectedGame = selectedGame,
-                onGamePlay = onGamePlay,
-                selectedGameState = selectedGameState,
-                onGameRestart = onGameRestart,
-                onFavoriteToggle = onFavoriteToggle,
-                shortcutSupported = shortcutSupported,
-                onCreateShortcut = onCreateShortcut,
+        if (RayNeoDeviceUtils.isRayNeoDevice()) {
+            LemuroidAlertDialog(
+                onDismissRequest = { selectedGameState.value = null },
+                confirmButton = {},
+                text = {
+                    Box(Modifier.verticalScroll(rememberScrollState())) {
+                        ContextActionContent(
+                            selectedGame = selectedGame,
+                            onGamePlay = onGamePlay,
+                            selectedGameState = selectedGameState,
+                            onGameRestart = onGameRestart,
+                            onFavoriteToggle = onFavoriteToggle,
+                            shortcutSupported = shortcutSupported,
+                            onCreateShortcut = onCreateShortcut,
+                        )
+                    }
+                },
             )
+        } else {
+            ModalBottomSheet(
+                sheetState = modalSheetState,
+                onDismissRequest = { selectedGameState.value = null },
+            ) {
+                ContextActionContent(
+                    selectedGame = selectedGame,
+                    onGamePlay = onGamePlay,
+                    selectedGameState = selectedGameState,
+                    onGameRestart = onGameRestart,
+                    onFavoriteToggle = onFavoriteToggle,
+                    shortcutSupported = shortcutSupported,
+                    onCreateShortcut = onCreateShortcut,
+                )
+            }
         }
     }
 }

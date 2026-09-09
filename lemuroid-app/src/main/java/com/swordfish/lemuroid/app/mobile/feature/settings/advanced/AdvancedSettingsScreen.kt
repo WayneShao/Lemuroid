@@ -1,7 +1,6 @@
 package com.swordfish.lemuroid.app.mobile.feature.settings.advanced
 
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -24,6 +23,7 @@ import com.swordfish.lemuroid.app.utils.android.settings.LemuroidSettingsSwitch
 import com.swordfish.lemuroid.app.utils.android.settings.booleanPreferenceState
 import com.swordfish.lemuroid.app.utils.android.settings.indexPreferenceState
 import com.swordfish.lemuroid.app.utils.android.settings.intPreferenceState
+import com.swordfish.lemuroid.app.mobile.shared.compose.ui.LemuroidAlertDialog as AlertDialog
 
 @Composable
 fun AdvancedSettingsScreen(

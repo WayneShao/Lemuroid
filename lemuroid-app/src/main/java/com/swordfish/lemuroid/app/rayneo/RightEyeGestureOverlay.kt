@@ -20,10 +20,12 @@ import timber.log.Timber
  * android.R.id.content with leftMargin=640, so FrameLayout dispatch hits it
  * first for any event in the right-eye region.
  */
-class RightEyeGestureOverlay(context: Context) : View(context) {
-
+class RightEyeGestureOverlay(
+    context: Context,
+    private val onDoubleTap: () -> Unit = { (context as? Activity)?.onBackPressed() },
+) : View(context) {
     private var lastTapMs = 0L
-    private val doubleTapWindowMs = 600L  // generous window — mirror lens taps are slower than touchscreen
+    private val doubleTapWindowMs = 600L // generous window — mirror lens taps are slower than touchscreen
 
     override fun onTouchEvent(ev: MotionEvent): Boolean {
         return handleEvent(ev)
@@ -38,17 +40,19 @@ class RightEyeGestureOverlay(context: Context) : View(context) {
         Timber.v("RightEyeGestureOverlay: action=${ev.actionMasked} source=0x${ev.source.toString(16)}")
         return when (ev.actionMasked) {
             MotionEvent.ACTION_DOWN,
-            MotionEvent.ACTION_BUTTON_PRESS -> true  // claim the gesture stream
+            MotionEvent.ACTION_BUTTON_PRESS,
+            -> true // claim the gesture stream
 
             MotionEvent.ACTION_UP,
-            MotionEvent.ACTION_BUTTON_RELEASE -> {
+            MotionEvent.ACTION_BUTTON_RELEASE,
+            -> {
                 val now = System.currentTimeMillis()
                 val delta = now - lastTapMs
                 Timber.d("RightEyeGestureOverlay: UP delta=${delta}ms")
                 if (lastTapMs != 0L && delta <= doubleTapWindowMs) {
                     Timber.d("RightEyeGestureOverlay: double-tap → back press")
                     lastTapMs = 0L
-                    (context as? Activity)?.onBackPressed()
+                    onDoubleTap()
                 } else {
                     lastTapMs = now
                 }

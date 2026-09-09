@@ -1,0 +1,45 @@
+name: RayNeo build
+
+on:
+  push:
+    branches: [rayneo]
+    paths-ignore: ['docs/**', '*.md']
+  pull_request:
+    branches: [rayneo]
+    paths-ignore: ['docs/**', '*.md']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: gradle
+      - name: Test device probe
+        run: python3 -B skills/porting-rayneo-android-apps/scripts/test_probe_device.py
+      - name: Verify and build RayNeo debug APK
+        run: |
+          chmod +x gradlew
+          ./gradlew :lemuroid-app:ktlintCheck :lemuroid-app:testFreeDynamicDebugUnitTest :lemuroid-app:lintFreeDynamicDebug :lemuroid-app:assembleFreeDynamicDebug --no-configuration-cache --max-workers=2
+      - uses: actions/upload-artifact@v4
+        with:
+          name: lemuroid-rayneo-debug
+          path: lemuroid-app/build/outputs/apk/freeDynamic/debug/lemuroid-app-free-dynamic-debug.apk
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: rayneo-validation-reports
+          path: |
+            lemuroid-app/build/reports/
+            lemuroid-app/build/test-results/

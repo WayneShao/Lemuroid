@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="rayneo_storage_title">游戏目录访问</string>
+    <string name="rayneo_storage_permission_required">读取此目录中的游戏需要“所有文件访问权限”。完成授权后返回此页，即可开始扫描。</string>
+    <string name="rayneo_storage_directory_unavailable">此目录打开或创建失败。请检查目录路径和存储访问权限，然后重试。原来的目录选择已保留。</string>
+    <string name="rayneo_storage_settings_unavailable">系统权限设置页未能打开。请通过连接的电脑授予文件访问权限，然后返回此页重新检查。</string>
+    <string name="rayneo_storage_grant">授予权限</string>
+    <string name="rayneo_storage_retry">重新检查</string>
+</resources>

@@ -4,7 +4,6 @@ import android.os.Bundle
 import android.view.KeyEvent
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.focusable
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Text
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -18,6 +17,7 @@ import com.swordfish.lemuroid.app.shared.input.ShortcutBindingUpdater
 import com.swordfish.lemuroid.lib.android.RetrogradeActivity
 import timber.log.Timber
 import javax.inject.Inject
+import com.swordfish.lemuroid.app.mobile.shared.compose.ui.LemuroidAlertDialog as AlertDialog
 
 class GamePadShortcutBindingActivity : RetrogradeActivity() {
     @Inject

@@ -107,6 +107,12 @@
             android:theme="@style/LemuroidMaterialTheme.Invisible" />
 
         <activity
+            android:name="com.swordfish.lemuroid.app.rayneo.RayNeoStorageActivity"
+            android:exported="false"
+            android:screenOrientation="landscape"
+            android:theme="@style/LemuroidMaterialTheme" />
+
+        <activity
             android:name="com.swordfish.lemuroid.app.shared.settings.StorageFrameworkPickerLauncher"
             android:theme="@style/LemuroidMaterialTheme.Invisible" />
 
