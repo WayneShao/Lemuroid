@@ -12,6 +12,8 @@ This fork maintains the RayNeo adaptation on the `rayneo` branch. The upstream p
 
 The Activity container does not cover arbitrary independent Popup/third-party/system windows. Adding a new modal entry requires checking its actual window and display ownership. The adapter also does not change the app's Android display configuration to a real 640×480 display.
 
+The follow-up [logical display feasibility study](docs/rayneo/logical-display-feasibility.md) evaluates a real single-eye VirtualDisplay with GPU presentation to both eyes. It is a design investigation, not a completed runtime backend.
+
 ## First installation and ROM access
 
 Build and install the freeDynamicDebug variant. Its package is `com.swordfish.lemuroid.debug`, signed with the repository's existing debug certificate. It is a debug build, not a production release.

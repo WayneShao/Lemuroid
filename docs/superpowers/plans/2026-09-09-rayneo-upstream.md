@@ -20,5 +20,12 @@
 - [x] Remove the unconditional all-files Settings launch from `mobile/feature/main/MainActivity.kt`.
 - [x] Add English and Simplified Chinese resources for the fallback page; document ADB grant and verification with explicit serial/package arguments.
 - [x] Run focused unit tests, changed-source formatting checks, final debug build and Android lint. Review the change for lifecycle and directory-selection regressions.
-- [ ] Verify signature compatibility, package/version, adaptation classes, and upstream/submodule ancestry. Copy the tested APK into a named release-artifact directory in the original workspace.
-- [ ] Bring the completed branch into the original workspace and write a short migration/validation record, keeping backup references and pending runtime checks explicit.
+- [x] Verify signature compatibility, package/version, adaptation classes, and upstream/submodule ancestry. Copy the tested APK into a named release-artifact directory in the original workspace.
+- [x] Bring the completed branch into the original workspace and write a short migration/validation record, keeping backup references and pending runtime checks explicit.
+
+## Scope additions and completion
+
+- Added a dedicated RayNeoStorageActivity, common DualEyeDialog / LemuroidAlertDialog, modal context-menu routing, and native error-dialog routing.
+- Created the user-owned fork and rayneo maintenance branch, CI workflow, validated reusable skill, and local installation of that skill.
+- Verified on-device help dialog duplication, initial permission recovery, Settings grant and directory creation, and indexing of a self-authored ROM. Physical input and broad game-performance acceptance remain explicitly separate.
+- Delivered the APK in the original workspace and recorded the requested logical-display feasibility analysis without changing system display configuration.
