@@ -35,6 +35,8 @@ python -B scripts/test_probe_device.py
 
 梳理适配触点而非逐页重写：Application 注册、设备识别、Manifest 元数据/进程/Activity、双眼普通 UI 容器、专用游戏/视频 renderer、输入 overlay、存储 provider 与扫描入口、构建 flavor/依赖版本。
 
+进行手势对照时，先确认设备清醒、目标窗口有焦点，并核对摘下眼镜后的自动省电设置。应用窗口的 `FLAG_KEEP_SCREEN_ON` 不能作为厂商省电策略或 ADB 持续在线的验证依据；黑屏、断线与应用崩溃分别查证。不因连接改善就把此前所有失败归为省电。需要临时调整系统设置时沿用当前授权、记录原值；用户主动修改的设置按其意图保留。方向开关的运行值与持久化值可能异步同步，恢复边界见 [输入与返回语义](input.md#临时切换方向开关与恢复)。
+
 同步后特别核对：
 
 - 新增 Activity、Compose 页面或 Dialog 是否落在适配边界之外；游戏进程自己的 Application 是否仍注册必要逻辑。
@@ -62,3 +64,7 @@ python -B scripts/test_probe_device.py
 本技能提炼自本地 `RAYNEO_APP_PORTING_PLAYBOOK_2026-03-18.md`（尤其显示/输入/生命周期、旧应用 SOP 和双目容器章节），以及 Lemuroid 适配中的 `DualEyeLayout`、`DualEyeActivityWrapper`、`RightEyeGestureOverlay`、`RayNeoGameScreen`、`RayNeoMirrorView` 和目录选择路径。引用名称用于在原项目追踪依据；执行技能无需安装这些项目。
 
 保留了机制与故障边界，没有把历史硬编码尺寸、厂商匹配、输入枚举顺序或注释中的性能断言当作跨设备保证。新工程优先查看自身实际代码与设备输出；此技能不要求引入 Lemuroid 的业务类或依赖。
+
+## Java 控件构造期的 Kotlin 重写方法
+
+Legado 的图片动作弹窗曾在阅读退出时触发已确认的崩溃：延迟创建 `PopupWindow` 子类时，Java 父类构造过程经 `setContentView` 调用了重写的 `isShowing`，而 Kotlin 子类的 Context 字段尚未赋值。重写查询应在构造期也成立，不能依赖子类已完成初始化；加入“构造后未显示就 dismiss、显示后 dismiss、重复 show”的设备回归检查。这个案例验证了具体初始化顺序，不能只因 Activity 在退出时崩溃就把原因归到 onDestroy 中的业务清理。

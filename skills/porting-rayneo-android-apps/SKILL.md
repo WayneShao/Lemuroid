@@ -23,7 +23,7 @@ description: Use when porting or maintaining an Android app for RayNeo glasses, 
 | 当前工作 | 必读参考 | 关键判断 |
 |---|---|---|
 | 菜单单眼、Compose、双眼视频/游戏、切后台黑屏 | [显示与生命周期](references/display.md) | 普通 View 复制与独立 Surface 分开；一个内容根只包装一次 |
-| 镜腿、返回、菜单、手柄、系统媒体键 | [输入与返回语义](references/input.md) | 先追踪事件来源和一次动作经过的路径，再映射业务行为 |
+| 镜腿、鼠标/光标导航、系统左右反向、返回、菜单、手柄 | [输入与返回语义](references/input.md) | 先确认系统是否已转换坐标，避免应用重复反转；再映射业务行为 |
 | 缺 DocumentsUI、授权页不存在、扫描为 0 | [目录与权限](references/storage.md) | 权限和目录列举成功后才保存选择并扫描 |
 | 同步上游、构建签名、交付 | [维护与验收](references/maintenance.md) | 对比已工作的适配，验证实际 APK 与设备边界 |
 

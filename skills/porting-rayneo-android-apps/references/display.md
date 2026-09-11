@@ -8,6 +8,8 @@
 
 有源码时，一个可复用实现是单独的 `DualEyeDialog`：Dialog 使用全宽窗口，内部仅一个单眼 ComposeView，并通过双绘制容器输出两眼。继承父 CompositionContext 以保留主题与状态；宿主 View 随窗口移除时释放 composition。Lemuroid 的共用 AlertDialog 入口和游戏长按菜单使用此模式；普通设备仍走原 Material 窗口。背景/面板拦截使用仅指针手势，不给手柄导航额外增加透明的 `clickable` 焦点；镜腿返回回调指向当前 Dialog 的 dismiss，而非误退后面的 Activity。此方式覆盖接入该入口的窗口，不自动接管第三方组件或系统权限窗口。
 
+Legado 的一次已确认反例：X3 Pro API 32 上运行 target SDK 36 的旧 APK 时，反射 `Dialog.mWindowManager` 被 hidden-API 检查拒绝，日志同时出现 `reflection, denied` 和 `NoSuchFieldException`；原版本 lint 也报 `SoonBlockedPrivateApi`。因此不能把私有字段反射的异常简单解释为字段从固件中消失，也不能把包装函数被调用视为窗口已双眼化。检查当前 target SDK、实际运行日志和窗口输出；优先选择公开的 Dialog/Window 内容接口。这个记录只验证了旧反射路径失败，不代表替代实现已经跨 App 验收。
+
 | 内容 | 可复用方向 | 前提及限制 |
 |---|---|---|
 | 普通 View；位于同一 View 窗口的 Compose | 一个逻辑内容树，限制到单眼区域，左右绘制 | 验证裁剪、硬件图层、动画、焦点、无障碍；不要把性能最高写成无条件结论 |
@@ -17,6 +19,8 @@
 | 输入已经是 SBS/立体帧 | 先判明左右半帧及目标显示模式 | 不要把完整 SBS 帧复制到每只眼睛造成二次分割 |
 
 历史 X3 Pro 项目记录为 `1280×480`、density `160`，每眼 `640×480`。这只能作为该设备配置；以当前显示、窗口可用区域、insets、方向和设备模式决定实际左右区域。也不要把投屏项目里的 180° 旋转、水平翻转机械加入新 App：用带文字、方向标记和边框的图案核对显示，再检查纹理矩阵。
+
+普通 View Dialog 的另一条已验证路径是保留系统 `DecorView` 与 `WindowManager` 的关系，把其公开子内容放进一个双绘制容器。外窗口覆盖两个眼区，每眼面板宽度单独保存；后续 `setLayout` 不应改变两眼间距。Legado 在 X3 Pro/API 32 上已验证 90% 宽度调整、重复显示、外部取消、不可取消窗口、右眼单次确认及菜单窗口关闭。它不覆盖平台输入法、任意 PopupWindow 或 Surface。
 
 ## 普通 View/Compose：一个内容根只包装一次
 
