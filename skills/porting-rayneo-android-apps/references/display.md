@@ -2,9 +2,21 @@
 
 ## 先确认输出路径
 
-对每个可见页面列出：Activity/窗口、业务内容根、普通 View/Compose 或独立 Surface、是否已经输出双眼。首页、设置、对话框、游戏菜单和权限恢复页都属于验收范围。
+覆盖目标是所有应用拥有的可见窗口与弹层。以实际创建/挂载路径建立清单，记录入口、宿主窗口或 Surface、内容安装时机、公共适配点、例外及源码/构建/实机证据。首页双眼正常、Activity 同属一个基类或包装函数执行过，都不足以证明其他层被覆盖。
 
-在源代码中搜索 `AlertDialog`、`Dialog`、`DropdownMenu`、`Popup`、`PopupWindow` 和窗口创建入口；单一 Activity 看起来双眼正常不能代表模态层已覆盖。可复用的应用内 Dialog 入口应保持原有确认、取消、外部点击与返回语义，再处理左右显示。只修改 `Resources.displayMetrics` 或 composable 的宽度并不改变实际 Window/Surface 输出目标。
+| 必查路径 | 容易遗漏的边界 |
+|---|---|
+| Activity、Fragment、Compose 页面 | 异步登录/配对/授权内容、透明 Activity、恢复状态、后续替换内容 |
+| Dialog、AlertDialog、DialogFragment、BottomSheet | 各自 Window；标题、正文、按钮、遮罩都应双眼一致 |
+| PopupWindow、Compose Popup/DropdownMenu、上下文菜单、Tooltip | 可能独立 Window/WindowManager 路径，也可能挂在已包装根之外 |
+| Toast、Snackbar、错误/退出/状态提示 | 应用 Context 和后台线程调用、公共消息库、依赖库及直接调用的旁路 |
+| 加载圈、空状态、播放控制/字幕、浮层 | 延迟添加到 DecorView、WindowManager.addView 或其他未包装容器 |
+| 视频、游戏、Web/原生混合内容 | 实际 View/Surface 归属；普通 View 双绘制不证明独立 Surface 已覆盖 |
+| 系统输入法、权限/设置、外部浏览器、系统 PiP | 单独标注所有权及验证状态，不能默认为应用包装器已覆盖 |
+
+有源码时搜索创建和显示入口；APK-only 时通过反编译调用链、Manifest、布局和运行时窗口信息建立同样的清单。可用关键词包括 `setContentView`、`addAsRoot`、`AlertDialog`、`Dialog`、`PopupWindow`、`DropdownMenu`、`Toast.makeText`、`Snackbar`、`addView`、`getRootView`、`WindowManager`；关键词命中不是可达性证明，还要追踪调用者和动态/延迟路径。优先合并到公共工厂或宿主适配点，详见 [最小侵入与版本迁移](minimal-adaptation.md)。
+
+可复用的弹层入口应保持原有确认、取消、外部点击、返回、遮罩、焦点恢复和超时语义。显示双眼与可操作是同一验收项：当前窗口的选中框/焦点必须能随方向操作移动，事件只执行一次。只修改 `Resources.displayMetrics` 或 composable 的宽度并不改变实际 Window/Surface 输出目标。
 
 有源码时，一个可复用实现是单独的 `DualEyeDialog`：Dialog 使用全宽窗口，内部仅一个单眼 ComposeView，并通过双绘制容器输出两眼。继承父 CompositionContext 以保留主题与状态；宿主 View 随窗口移除时释放 composition。Lemuroid 的共用 AlertDialog 入口和游戏长按菜单使用此模式；普通设备仍走原 Material 窗口。背景/面板拦截使用仅指针手势，不给手柄导航额外增加透明的 `clickable` 焦点；镜腿返回回调指向当前 Dialog 的 dismiss，而非误退后面的 Activity。此方式覆盖接入该入口的窗口，不自动接管第三方组件或系统权限窗口。
 
@@ -22,6 +34,8 @@ Legado 的一次已确认反例：X3 Pro API 32 上运行 target SDK 36 的旧 A
 
 普通 View Dialog 的另一条已验证路径是保留系统 `DecorView` 与 `WindowManager` 的关系，把其公开子内容放进一个双绘制容器。外窗口覆盖两个眼区，每眼面板宽度单独保存；后续 `setLayout` 不应改变两眼间距。Legado 在 X3 Pro/API 32 上已验证 90% 宽度调整、重复显示、外部取消、不可取消窗口、右眼单次确认及菜单窗口关闭。它不覆盖平台输入法、任意 PopupWindow 或 Surface。
 
+X3 Pro 上特定硬件加速双眼绘制曾伴随整机重启；CloneTTS 文件页局部软件渲染与绘制调整后已由用户实测恢复。遇到页面显示即重启或计划替换已工作的渲染路径时，先读 [设备与固件缺陷](device-defects.md)，保留已验证的局部规避，不泛化为全部硬件加速不可用。
+
 ## 普通 View/Compose：一个内容根只包装一次
 
 复用已有效的双绘制容器时保持一个逻辑内容树，左右眼使用同一状态和同一输入入口。绘制第二份视觉并不要求创建第二个 ViewModel、NavHost、播放器或扫描任务。
@@ -33,9 +47,15 @@ Legado 的一次已确认反例：X3 Pro API 32 上运行 target SDK 36 的旧 A
 5. 显示坐标、单眼逻辑坐标和输入坐标分开。右眼坐标重映射使用事件副本并在分发后回收；避免原地修改共享 `MotionEvent` 影响其他监听或重复偏移。
 6. 透明 Activity 的恢复界面需要可读的不透明背景；给短高度页面安排滚动、手柄焦点和两眼同时可见的错误提示。
 
+Compose 根重挂载要区分 **composition** 和 **window recomposer** 的生命周期。Lemuroid/Compose 1.6.x 的实机回归表明：首次全局布局后移动根 ComposeView，即使设置 `DisposeOnViewTreeLifecycleDestroyed` 保留 composition，detach 仍会取消其 window recomposer，造成事件/焦点在变但页面冻结，手柄与触控板都像失效。优先在内容已设置、窗口尚未 attach 时安装包装器（该项目在 Activity started 回调执行）；独立 Dialog 的内层 ComposeView 显式继承父 CompositionContext。必须处理已 attached 的新根时，不保留依赖已取消 recomposer 的 composition；重建该根会重置其中的临时 remember 状态，应明确这个代价。回归至少包含冷启动后的方向移动、确认切页、异步内容更新和再次打开窗口，而不只看静态截图或按键日志。
+
+软件绘制的双眼容器还要检查 `invalidateChildInParent` 的 dirty rect；`onDescendantInvalidated` 仅覆盖硬件加速路径。按钮高亮或列表选中框只使左眼区域变脏时，右眼可能保留旧内容。按当前容器坐标扩大双眼重绘区域，实测连续选择和异步文字变化。
+
 普通 View 容器的 `dispatchDraw` 复制是一种已在本地项目采用的技术，不保证所有 Compose 图层、Popup 或第三方 View 都一致。先验证现有容器与失败窗口的关系；只在确认视觉复制不适用后才考虑双 Compose 渲染，并把业务副作用、导航和输入保留在共同上层。
 
 ## Surface、视频与游戏
+
+针对 PixelCopy/TextureView 视频复制发热或把已验证的 OES 方案迁到其他播放器，继续读 [高性能视频路径](high-performance-video.md)。其中包含接入点选择、透明 UI、单眼尺寸上限和运行时验收；不是所有播放器都可直接套用同一个类。
 
 有渲染控制权时，单播放器/解码器输出同一纹理，再使用左右 viewport；保留 Fit/Zoom/Stretch、实际帧宽高、纹理变换矩阵与字幕/控件所在层。不要引入双解码或第二个模拟器实例。
 

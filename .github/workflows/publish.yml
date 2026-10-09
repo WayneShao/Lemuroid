@@ -9,6 +9,7 @@ jobs:
 
   build:
     name: Build APK
+    if: github.repository == 'Swordfish90/Lemuroid'
     runs-on: ubuntu-latest
 
     steps:

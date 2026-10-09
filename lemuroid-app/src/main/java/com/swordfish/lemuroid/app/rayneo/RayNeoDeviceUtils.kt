@@ -14,7 +14,6 @@ object RayNeoDeviceUtils {
      *   wm density              = 160
      */
     fun isRayNeoDevice(): Boolean {
-        return Build.MANUFACTURER.equals("RayNeo", ignoreCase = true) ||
-            Build.MODEL.equals("ARGF20", ignoreCase = true)
+        return Build.MODEL.equals("ARGF20", ignoreCase = true)
     }
 }

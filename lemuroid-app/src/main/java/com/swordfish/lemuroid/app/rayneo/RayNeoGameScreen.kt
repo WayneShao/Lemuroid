@@ -15,18 +15,17 @@ import com.swordfish.libretrodroid.GLRetroView
 /**
  * Game screen for RayNeo X3 Pro.
  *
- * Layout: 1280×480 full screen (the physical display of the glasses)
- *   Left  640px  →  GLRetroView  (the actual game, rendered by LibretroDroid)
- *   Right 640px  →  RayNeoMirrorView  (PixelCopy mirror of the left eye)
+ * The current window is split into equal eye regions (typically 640×480 each).
+ * The left eye owns GLRetroView; the right eye copies that same rendered Surface.
  *
  * No on-screen touch controls are shown — the user is expected to use a
  * Bluetooth gamepad (Xbox, PS, etc.), which Lemuroid already supports natively.
  *
- * The right-eye back gesture is installed by DualEyeActivityWrapper.
+ * Temple input is handled by the Activity's shared RayNeo input adapter.
  */
 @Composable
 fun RayNeoGameScreen(viewModel: BaseGameScreenViewModel) {
-    val lifecycle = LocalLifecycleOwner.current
+    val lifecycleOwner = LocalLifecycleOwner.current
 
     // Mutable ref so the update lambda of the mirror AndroidView can connect to the source.
     val retroViewRef = remember { arrayOfNulls<GLRetroView>(1) }
@@ -40,14 +39,22 @@ fun RayNeoGameScreen(viewModel: BaseGameScreenViewModel) {
                     .weight(1f)
                     .fillMaxHeight(),
             factory = { context ->
-                viewModel.createRetroView(context, lifecycle).also { view ->
+                viewModel.createRetroView(context, lifecycleOwner).also { view ->
                     retroViewRef[0] = view
                     // Force the viewport to fill the entire left-half container.
                     // (MobileGameScreen sets this dynamically based on touch-pad layout;
                     //  on RayNeo there are no touch controls, so full extent is correct.)
                     view.viewport = RectF(0f, 0f, 1f, 1f)
+                    // Keep the viewportAlignment supplied by the upstream view-model factory.
                     // If the mirror view was already created, connect it now.
                     mirrorViewRef[0]?.attachSource(view)
+                }
+            },
+            onReset = null,
+            onRelease = { view ->
+                if (retroViewRef[0] === view) {
+                    retroViewRef[0] = null
+                    mirrorViewRef[0]?.detachSource()
                 }
             },
         )
@@ -64,6 +71,15 @@ fun RayNeoGameScreen(viewModel: BaseGameScreenViewModel) {
                     // If the GLRetroView was already created, connect immediately.
                     retroViewRef[0]?.let { view.attachSource(it) }
                 }
+            },
+            onReset = null,
+            update = { view ->
+                view.bindLifecycle(lifecycleOwner.lifecycle)
+                retroViewRef[0]?.let { view.attachSource(it) }
+            },
+            onRelease = { view ->
+                if (mirrorViewRef[0] === view) mirrorViewRef[0] = null
+                view.release()
             },
         )
     }

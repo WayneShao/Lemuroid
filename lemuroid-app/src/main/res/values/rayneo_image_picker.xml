@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="rayneo_image_picker_title">Lemuroid · Choose cover image</string>
+    <string name="rayneo_image_picker_up">Up</string>
+    <string name="rayneo_image_picker_grant">Grant access</string>
+    <string name="rayneo_image_picker_retry">Retry</string>
+    <string name="rayneo_image_picker_cancel">Cancel</string>
+    <string name="rayneo_image_picker_permission_required">Allow file access to choose an image. Grant access, then return here. No image is selected automatically.</string>
+    <string name="rayneo_image_picker_settings_unavailable">File access settings are unavailable. After file access is granted to Lemuroid, choose Retry, or Cancel to go back.</string>
+    <string name="rayneo_image_picker_directory_unavailable">This folder could not be read. Go up, check file access, or retry.</string>
+    <string name="rayneo_image_picker_empty">No image files or subfolders in this folder.</string>
+    <string name="rayneo_image_picker_choose">Choose an image, or open a folder. Back goes up one level.</string>
+    <string name="rayneo_image_picker_loading">Reading folder…</string>
+    <string name="rayneo_image_picker_checking">Checking image…</string>
+    <string name="rayneo_image_picker_invalid_image">This file could not be opened as an image. Choose another file, or retry.</string>
+    <string name="rayneo_image_picker_folder">Folder: %1$s</string>
+</resources>

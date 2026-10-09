@@ -13,6 +13,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.swordfish.lemuroid.app.rayneo.rayNeoContextMenu
 import com.swordfish.lemuroid.lib.library.db.entity.Game
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -28,6 +29,7 @@ fun LemuroidGameListRow(
         modifier =
             modifier
                 .wrapContentHeight()
+                .rayNeoContextMenu(onLongClick)
                 .combinedClickable(
                     onClick = onClick,
                     onLongClick = onLongClick,

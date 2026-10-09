@@ -2,7 +2,10 @@ package com.swordfish.lemuroid.app.rayneo
 
 import android.content.Context
 import android.graphics.Canvas
+import android.graphics.Rect
 import android.view.MotionEvent
+import android.view.View
+import android.view.ViewParent
 import android.widget.FrameLayout
 
 /**
@@ -12,7 +15,7 @@ import android.widget.FrameLayout
  * on the RayNeo X3 Pro's 1280×480 display.
  *
  * In hardware-accelerated mode Android records child draw operations into
- * RenderNodes (GPU display lists). The second [super.dispatchDraw] call simply
+ * RenderNodes (GPU display lists). The second child draw simply
  * replays those already-recorded display lists; no re-execution of draw code
  * and no CPU bitmap readback is needed. This keeps a single View hierarchy
  * and a single set of UI state; independent windows still need their own wrapper.
@@ -53,15 +56,39 @@ class DualEyeLayout(
         }
     }
 
-    override fun dispatchDraw(canvas: Canvas) {
-        // Left eye — normal render at x=0
-        super.dispatchDraw(canvas)
+    override fun drawChild(
+        canvas: Canvas,
+        child: View,
+        drawingTime: Long,
+    ): Boolean {
+        // Repeat each child's drawing within one traversal, including dynamically invalidated content.
+        val left = super.drawChild(canvas, child, drawingTime)
+        val checkpoint = canvas.save()
+        return try {
+            canvas.translate(eyeWidth.toFloat(), 0f)
+            super.drawChild(canvas, child, drawingTime) || left
+        } finally {
+            canvas.restoreToCount(checkpoint)
+        }
+    }
 
-        // Right eye — translate and replay the same RenderNode display lists
-        canvas.save()
-        canvas.translate(eyeWidth.toFloat(), 0f)
-        super.dispatchDraw(canvas)
-        canvas.restore()
+    override fun onDescendantInvalidated(
+        child: View,
+        target: View,
+    ) {
+        super.onDescendantInvalidated(child, target)
+        // The dirty child lives only in the left half, but both output regions need repainting.
+        invalidate()
+    }
+
+    @Suppress("DEPRECATION")
+    override fun invalidateChildInParent(
+        location: IntArray,
+        dirty: Rect,
+    ): ViewParent? {
+        // Native pickers use a software canvas. Their dirty region must include both eyes too.
+        dirty.set(-location[0], -location[1], width - location[0], height - location[1])
+        return super.invalidateChildInParent(location, dirty)
     }
 
     companion object {

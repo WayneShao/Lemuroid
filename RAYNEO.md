@@ -1,16 +1,23 @@
 # Lemuroid for RayNeo X3 Pro
 
-This fork maintains the RayNeo adaptation on the `rayneo` branch. The upstream project remains Swordfish90/Lemuroid; merge its `master` into the adaptation branch when updating. The current upstream base is `53752bf2` with its pinned cores submodule `fee2e824`. Upstream versionCode is 252 and versionName is 1.17.0.
+This fork maintains the RayNeo adaptation on the `rayneo` branch. The upstream project remains Swordfish90/Lemuroid; merge its `master` into the adaptation branch when updating. The current upstream base is `93e321d0` with its pinned cores submodule `fee2e824`. Upstream versionCode is 252 and versionName is 1.17.0. The maintained build is `1.17.0-rayneo.2`; its launcher name is **Lemuroid**. Installable versions are tracked in [GitHub Releases](https://github.com/WayneShao/Lemuroid/releases).
 
 ## Adaptation boundaries
 
+Maintenance is limited to this application's own code, windows and input. The current glasses have no root access. The owner reports that replacing or changing the system IME has already caused device reboots and similar constraints exist in other firmware components. Keep the installed system IME and components as they are; system adaptation, root, global display changes and reboot experiments are outside this port. An app text field may use the existing IME, but that does not establish stereo support for the IME window.
+
 - The tested device profile is X3 Pro / ARGF20, Android API 32, 1280×480 at density 160, with a 640×480 logical region for each eye.
+- The initial wrapper is installed before the window attaches so moving a Compose root does not cancel its window recomposer. Already attached replacement roots recreate their composition; their temporary `remember` state is not retained across that exceptional reparent.
 - `DualEyeLayout` draws one normal View/Compose tree to both eyes. `DualEyeActivityWrapper` installs it for ordinary activities; the game activity keeps its own two-Surface output.
 - `DualEyeDialog` provides the same single-composition approach inside a separate Dialog window. `LemuroidAlertDialog` is the common entry for help, settings lists, input binding, confirmation, native error messages and the RayNeo game context menu. Ordinary Android devices retain Material dialogs/sheets.
 - Game output keeps the previously working `GLRetroView` + `RayNeoMirrorView` / PixelCopy path. This is a distinct rendering path, with additional copy/presentation cost; no measured frame-rate or latency guarantee is claimed.
-- Bluetooth gamepads use upstream Lemuroid input. The current device's right-eye gesture overlay routes double tap to back; dialogs receive their own dismiss action.
+- Bluetooth gamepads and real mice use upstream Lemuroid input. The right temple (`cyttsp5_mt`) uses native two-axis focus: swipe to move, single tap to confirm after the double-tap interval, double tap to go back, and two-finger tap to send MENU. Game cards and the running game connect MENU to their context/menu actions. Left-temple and CapSense events delivered to this app are consumed before child controls; firmware-owned system gestures remain outside this adapter.
+- Each window owns its input state. A pending confirmation is discarded when the window, focused control, layout target or list item changes. Focus is established on entry and recovered after dynamic navigation; an already-consumed direction key is never replayed as another movement.
+- Shared adapters cover late Activity content, dialogs, modal sheets, app messages, the game loading view and text action toolbars. The new upstream custom-name dialog uses the same stereo modal entry. On firmware without an image chooser, cover art uses a separate in-app file page; it does not change the ROM directory.
+- Static native storage/image pages use software drawing locally due the recorded X3 Pro HWUI defect. Compose and the game retain their existing hardware rendering. Dirty regions are expanded for both drawing modes.
+- PixelCopy owns one in-flight buffer at a time, waits for callbacks before recycling it, drops stale results and stops while paused or detached. This is lifecycle hardening, not a claim of zero-copy or frame-perfect output.
 
-The Activity container does not cover arbitrary independent Popup/third-party/system windows. Adding a new modal entry requires checking its actual window and display ownership. The adapter also does not change the app's Android display configuration to a real 640×480 display.
+The Activity container does not cover arbitrary independent Popup/third-party/system windows. Adding a new modal entry requires checking its actual window and display ownership. Compose text selection/cursor drag handles are still independent Popup windows; they are an open editing-overlay limitation even though the text action toolbar is in-tree. The system IME, Settings and external chooser belong to other apps. The adapter also does not change the app's Android display configuration to a real 640×480 display.
 
 The follow-up [logical display feasibility study](docs/rayneo/logical-display-feasibility.md) evaluates a real single-eye VirtualDisplay with GPU presentation to both eyes. It is a design investigation, not a completed runtime backend.
 
@@ -36,6 +43,8 @@ Return to the app and choose **Check again**. An appop value alone is not proof 
 
 ## Build and verification
 
+See the [2026-10-09 acceptance report](docs/rayneo/2026-10-09-validation.md) for this version, including confirmed input recovery and features whose device acceptance remains open.
+
 Use JDK 17, the Android SDK, and initialized submodules. Set `JAVA_HOME`, `ANDROID_HOME`/`ANDROID_SDK_ROOT`, or a local `sdk.dir` as appropriate for the host; local machine paths are not committed.
 
 ```powershell
@@ -58,5 +67,7 @@ git switch rayneo
 git merge upstream/master
 git submodule update --init --recursive
 ```
+
+The upstream publishing workflow is restricted to the upstream repository so a RayNeo tag does not invoke its unavailable signing secrets. For a maintained release, verify the exact APK, update the `rayneo` branch, tag that commit, and attach the APK plus SHA-256 file and an acceptance report to GitHub Releases. Retain the existing signing identity for updates. Build success, installation, injected-input evidence and physical temple/optical acceptance are separate statuses.
 
 Run verification before pushing. Do not replace the pinned cores revision with the core repository's moving head. The March playbook remains a historical reference; use the current skill and source for present implementation boundaries.

@@ -5,6 +5,8 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.provider.Settings
 import android.widget.Toast
 
@@ -24,14 +26,38 @@ fun Activity.displayToast(
     string: String,
     length: Int = Toast.LENGTH_SHORT,
 ) {
-    Toast.makeText(this, string, length).show()
+    ActivityMessages.show(this, string, length)
 }
 
 fun Activity.displayToast(
     stringId: Int,
     length: Int = Toast.LENGTH_SHORT,
 ) {
-    Toast.makeText(this, stringId, length).show()
+    displayToast(getString(stringId), length)
+}
+
+/** Optional presentation at the common message boundary; the utility module stays device independent. */
+object ActivityMessages {
+    var presenter: ((Activity, String, Int) -> Boolean)? = null
+    private val handler = Handler(Looper.getMainLooper())
+
+    fun show(
+        activity: Activity,
+        message: String,
+        duration: Int,
+    ) {
+        val present =
+            Runnable {
+                if (!activity.isDestroyed && !activity.isFinishing) {
+                    val handled =
+                        runCatching { presenter?.invoke(activity, message, duration) == true }.getOrDefault(
+                            false,
+                        )
+                    if (!handled) Toast.makeText(activity, message, duration).show()
+                }
+            }
+        if (Looper.myLooper() == Looper.getMainLooper()) present.run() else handler.post(present)
+    }
 }
 
 fun Context.animationDuration(): Int {

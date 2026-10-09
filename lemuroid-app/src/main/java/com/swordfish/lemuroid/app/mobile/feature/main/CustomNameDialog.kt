@@ -1,7 +1,6 @@
 package com.swordfish.lemuroid.app.mobile.feature.main
 
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -13,7 +12,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import com.swordfish.lemuroid.R
-
+import com.swordfish.lemuroid.app.mobile.shared.compose.ui.LemuroidAlertDialog as AlertDialog
 
 @Composable
 fun CustomNameDialog(
@@ -42,12 +41,12 @@ fun CustomNameDialog(
                     }
                 },
             ) {
-                Text("OK")
+                Text(stringResource(android.R.string.ok))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancel")
+                Text(stringResource(android.R.string.cancel))
             }
         },
     )

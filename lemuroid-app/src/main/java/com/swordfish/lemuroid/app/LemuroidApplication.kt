@@ -9,10 +9,12 @@ import coil.ImageLoaderFactory
 import com.google.android.material.color.DynamicColors
 import com.swordfish.lemuroid.app.rayneo.DualEyeActivityWrapper
 import com.swordfish.lemuroid.app.rayneo.RayNeoDeviceUtils
+import com.swordfish.lemuroid.app.rayneo.RayNeoMessages
 import com.swordfish.lemuroid.app.shared.covers.CoverUtils
 import com.swordfish.lemuroid.app.shared.startup.GameProcessInitializer
 import com.swordfish.lemuroid.app.shared.startup.MainProcessInitializer
 import com.swordfish.lemuroid.app.utils.android.isMainProcess
+import com.swordfish.lemuroid.common.ActivityMessages
 import com.swordfish.lemuroid.ext.feature.context.ContextHandler
 import com.swordfish.lemuroid.lib.injection.HasWorkerInjector
 import dagger.android.AndroidInjector
@@ -40,6 +42,7 @@ class LemuroidApplication : DaggerApplication(), HasWorkerInjector, ImageLoaderF
         DynamicColors.applyToActivitiesIfAvailable(this)
 
         if (RayNeoDeviceUtils.isRayNeoDevice()) {
+            ActivityMessages.presenter = RayNeoMessages::show
             registerActivityLifecycleCallbacks(DualEyeActivityWrapper())
         }
     }

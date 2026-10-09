@@ -32,12 +32,12 @@ fun DualEyeDialog(
         AndroidView(
             modifier = Modifier.fillMaxSize(),
             factory = { context ->
-                FrameLayout(context).apply {
+                RayNeoInputFrameLayout(context).apply {
                     val dualEye = DualEyeLayout(context, eyeWidth)
                     dualEye.addView(
                         ComposeView(context).apply {
                             setParentCompositionContext(compositionContext)
-                            setContent { currentContent.value() }
+                            setContent { RayNeoTextToolbarHost { currentContent.value() } }
                         },
                         FrameLayout.LayoutParams(eyeWidth, FrameLayout.LayoutParams.MATCH_PARENT),
                     )
@@ -48,8 +48,10 @@ fun DualEyeDialog(
                             FrameLayout.LayoutParams.MATCH_PARENT,
                         ),
                     )
+                    val input = RightEyeGestureOverlay(context) { currentDismiss.value() }
+                    templeInput = input
                     addView(
-                        RightEyeGestureOverlay(context) { currentDismiss.value() },
+                        input,
                         FrameLayout.LayoutParams(eyeWidth, FrameLayout.LayoutParams.MATCH_PARENT).apply {
                             leftMargin = eyeWidth
                         },

@@ -27,6 +27,13 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC"/>
     <uses-permission android:name="android.permission.RECORD_AUDIO"/>
 
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.GET_CONTENT" />
+            <data android:mimeType="image/*" />
+        </intent>
+    </queries>
+
     <application
         android:name="com.swordfish.lemuroid.app.LemuroidApplication"
         android:allowBackup="true"
@@ -105,6 +112,13 @@
         <activity
             android:name="com.swordfish.lemuroid.app.mobile.feature.input.GamePadShortcutBindingActivity"
             android:theme="@style/LemuroidMaterialTheme.Invisible" />
+
+        <activity
+            android:name="com.swordfish.lemuroid.app.rayneo.RayNeoImagePickerActivity"
+            android:exported="false"
+            android:hardwareAccelerated="false"
+            android:screenOrientation="landscape"
+            android:theme="@style/LemuroidMaterialTheme" />
 
         <activity
             android:name="com.swordfish.lemuroid.app.rayneo.RayNeoStorageActivity"

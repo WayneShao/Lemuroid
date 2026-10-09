@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="rayneo_image_picker_title">Lemuroid · 选择封面图片</string>
+    <string name="rayneo_image_picker_up">上一级</string>
+    <string name="rayneo_image_picker_grant">授予权限</string>
+    <string name="rayneo_image_picker_retry">重试</string>
+    <string name="rayneo_image_picker_cancel">取消</string>
+    <string name="rayneo_image_picker_permission_required">选择图片需要文件访问权限。请授予权限后返回此页，图片需手动选择。</string>
+    <string name="rayneo_image_picker_settings_unavailable">文件权限设置页未能打开。为 Lemuroid 授予文件访问权限后点击“重试”，或点击“取消”返回。</string>
+    <string name="rayneo_image_picker_directory_unavailable">此目录读取失败。请返回上一级、检查文件权限或重试。</string>
+    <string name="rayneo_image_picker_empty">此目录内没有图片文件或子目录。</string>
+    <string name="rayneo_image_picker_choose">请选择图片或进入子目录，返回键可回到上一级。</string>
+    <string name="rayneo_image_picker_loading">正在读取目录…</string>
+    <string name="rayneo_image_picker_checking">正在检查图片…</string>
+    <string name="rayneo_image_picker_invalid_image">此文件未能作为图片打开，请选择其他文件或重试。</string>
+    <string name="rayneo_image_picker_folder">目录：%1$s</string>
+</resources>

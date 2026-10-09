@@ -3,8 +3,14 @@ package com.swordfish.lemuroid.app.rayneo
 import android.app.Activity
 import android.app.Application
 import android.os.Bundle
+import android.view.View
+import android.view.ViewGroup
+import android.view.ViewTreeObserver
 import android.widget.FrameLayout
+import androidx.compose.ui.platform.AbstractComposeView
+import androidx.compose.ui.platform.ViewCompositionStrategy
 import timber.log.Timber
+import java.util.WeakHashMap
 
 /**
  * ActivityLifecycleCallbacks that wraps every Activity's root content view
@@ -15,73 +21,79 @@ import timber.log.Timber
  * manages its own right-eye mirror via RayNeoMirrorView + PixelCopy.
  */
 class DualEyeActivityWrapper : Application.ActivityLifecycleCallbacks {
+    private val listeners = WeakHashMap<Activity, ViewTreeObserver.OnGlobalLayoutListener>()
+
     override fun onActivityCreated(
         activity: Activity,
         savedInstanceState: Bundle?,
     ) {
-        activity.window.decorView.post {
-            if (activity is RayNeoGameActivity) {
-                // Game screen manages its own dual-eye rendering (GLRetroView + PixelCopy).
-                // Only add the right-eye gesture overlay so double-tap exit still works.
-                addRightEyeOverlayOnly(activity)
-            } else {
-                wrapWithDualEye(activity)
-            }
+        val content = activity.findViewById<FrameLayout>(android.R.id.content) ?: return
+        val listener = ViewTreeObserver.OnGlobalLayoutListener { install(activity, content) }
+        listeners[activity] = listener
+        content.viewTreeObserver.addOnGlobalLayoutListener(listener)
+        content.post {
+            if (!activity.isDestroyed && !activity.isFinishing) install(activity, content)
         }
     }
 
-    private fun addRightEyeOverlayOnly(activity: Activity) {
-        val contentFrame =
-            activity.window.decorView
-                .findViewById<FrameLayout>(android.R.id.content) ?: return
-        // Avoid duplicating the overlay on config changes
-        if (contentFrame.findViewWithTag<RightEyeGestureOverlay>("right_eye_overlay") != null) return
-        val rightEyeOverlay = RightEyeGestureOverlay(activity).apply { tag = "right_eye_overlay" }
-        contentFrame.addView(
-            rightEyeOverlay,
-            FrameLayout.LayoutParams(DualEyeLayout.SINGLE_EYE_WIDTH, FrameLayout.LayoutParams.MATCH_PARENT).apply {
-                leftMargin = DualEyeLayout.SINGLE_EYE_WIDTH
-            },
-        )
-        Timber.d("DualEyeActivityWrapper: added right-eye overlay to ${activity.javaClass.simpleName}")
+    private fun install(
+        activity: Activity,
+        content: FrameLayout,
+    ) {
+        if (activity.isDestroyed || content.childCount == 0) return
+        val existing = (0 until content.childCount).map { content.getChildAt(it) }
+        var host = existing.filterIsInstance<RayNeoInputFrameLayout>().firstOrNull()
+        val additions = existing.filter { it !== host }
+        if (host != null && additions.isEmpty()) return
+        if (host == null) {
+            host = RayNeoInputFrameLayout(activity)
+            val body = if (activity is RayNeoGameActivity) FrameLayout(activity) else DualEyeLayout(activity)
+            body.tag = CONTENT_TAG
+            host.addView(body, FrameLayout.LayoutParams(-1, -1))
+            val input = RightEyeGestureOverlay(activity)
+            input.setKeyDispatcher(activity::dispatchKeyEvent)
+            host.templeInput = input
+            host.addView(
+                input,
+                FrameLayout.LayoutParams(DualEyeLayout.SINGLE_EYE_WIDTH, -1).apply {
+                    leftMargin = DualEyeLayout.SINGLE_EYE_WIDTH
+                },
+            )
+            content.addView(host, FrameLayout.LayoutParams(-1, -1))
+        }
+        val body = host.findViewWithTag<FrameLayout>(CONTENT_TAG)
+        host.templeInput?.cancelPendingInput()
+        additions.forEach { child ->
+            val old = child.layoutParams
+            prepareComposition(child)
+            content.removeView(child)
+            val params = FrameLayout.LayoutParams(old)
+            if (activity !is RayNeoGameActivity && params.width != 0) {
+                params.width = DualEyeLayout.SINGLE_EYE_WIDTH
+            }
+            body.addView(child, params)
+        }
+        Timber.d("RayNeo content attached: %s, roots=%d", activity.javaClass.simpleName, additions.size)
     }
 
-    private fun wrapWithDualEye(activity: Activity) {
-        val contentFrame =
-            activity.window.decorView
-                .findViewById<FrameLayout>(android.R.id.content) ?: return
-
-        if (contentFrame.childCount == 0) return
-
-        val child = contentFrame.getChildAt(0)
-        if (child is DualEyeLayout) return // already wrapped (e.g. after config change)
-
-        Timber.d("DualEyeActivityWrapper: wrapping ${activity.javaClass.simpleName}")
-
-        contentFrame.removeViewAt(0)
-
-        val dualEye = DualEyeLayout(activity)
-        dualEye.addView(
-            child,
-            FrameLayout.LayoutParams(DualEyeLayout.SINGLE_EYE_WIDTH, FrameLayout.LayoutParams.MATCH_PARENT),
-        )
-        contentFrame.addView(
-            dualEye,
-            FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT),
-        )
-
-        // Transparent overlay over the right-eye region (x=640..1280) to catch
-        // Mercury mirror-lens events and translate double-tap → back press.
-        val rightEyeOverlay = RightEyeGestureOverlay(activity)
-        contentFrame.addView(
-            rightEyeOverlay,
-            FrameLayout.LayoutParams(DualEyeLayout.SINGLE_EYE_WIDTH, FrameLayout.LayoutParams.MATCH_PARENT).apply {
-                leftMargin = DualEyeLayout.SINGLE_EYE_WIDTH
-            },
-        )
+    private fun prepareComposition(view: View) {
+        if (view is AbstractComposeView) {
+            // Normally installation happens before attach in onActivityStarted. A genuinely late
+            // root may already own a window recomposer which detaching will cancel; recreate only
+            // that new root's composition instead of retaining a frozen one in the stereo host.
+            if (view.isAttachedToWindow) view.disposeComposition()
+            view.setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
+        }
+        if (view is ViewGroup) {
+            for (index in 0 until view.childCount) prepareComposition(view.getChildAt(index))
+        }
     }
 
-    override fun onActivityStarted(activity: Activity) {}
+    override fun onActivityStarted(activity: Activity) {
+        // setContent() has run, but the window has not attached yet. Reparenting after the first
+        // layout detaches the Compose root and cancels its window recomposer, freezing all UI updates.
+        activity.findViewById<FrameLayout>(android.R.id.content)?.let { install(activity, it) }
+    }
 
     override fun onActivityResumed(activity: Activity) {}
 
@@ -94,5 +106,12 @@ class DualEyeActivityWrapper : Application.ActivityLifecycleCallbacks {
         outState: Bundle,
     ) {}
 
-    override fun onActivityDestroyed(activity: Activity) {}
+    override fun onActivityDestroyed(activity: Activity) {
+        val content = activity.findViewById<View>(android.R.id.content)
+        listeners.remove(activity)?.let { content?.viewTreeObserver?.removeOnGlobalLayoutListener(it) }
+    }
+
+    companion object {
+        private const val CONTENT_TAG = "rayneo_activity_content"
+    }
 }

@@ -2,7 +2,6 @@ package com.swordfish.lemuroid.app.mobile.feature.main
 
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -32,17 +31,13 @@ import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.RestartAlt
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import com.swordfish.lemuroid.app.mobile.shared.compose.ui.LemuroidModalBottomSheet as ModalBottomSheet
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.SheetState
 import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -58,11 +53,13 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.swordfish.lemuroid.R
-import com.swordfish.lemuroid.app.rayneo.RayNeoDeviceUtils
 import com.swordfish.lemuroid.app.mobile.shared.compose.ui.LemuroidGameTexts
 import com.swordfish.lemuroid.app.mobile.shared.compose.ui.LemuroidSmallGameImage
+import com.swordfish.lemuroid.app.rayneo.RayNeoDeviceUtils
+import com.swordfish.lemuroid.app.rayneo.RayNeoImagePickerContract
 import com.swordfish.lemuroid.lib.library.db.entity.Game
 import timber.log.Timber
+import com.swordfish.lemuroid.app.mobile.shared.compose.ui.LemuroidModalBottomSheet as ModalBottomSheet
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -129,22 +126,25 @@ private fun ContextActionContent(
     val context = LocalContext.current
     var showCustomNameDialog by remember { mutableStateOf(false) }
 
-    val imagePickerLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.GetContent(),
-    ) { uri: Uri? ->
-        if (uri != null) {
-            try {
-                context.contentResolver.takePersistableUriPermission(
-                    uri,
-                    android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION,
-                )
-            } catch (e: SecurityException) {
-                Timber.e(e, "Failed to persist read URI permission for custom cover")
+    val imagePickerLauncher =
+        rememberLauncherForActivityResult(
+            contract = RayNeoImagePickerContract(),
+        ) { uri: Uri? ->
+            if (uri != null) {
+                try {
+                    if (uri.scheme == "content") {
+                        context.contentResolver.takePersistableUriPermission(
+                            uri,
+                            android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION,
+                        )
+                    }
+                } catch (e: SecurityException) {
+                    Timber.e(e, "Failed to persist read URI permission for custom cover")
+                }
+                onSetCustomCoverUri(selectedGame, uri.toString())
+                selectedGameState.value = null
             }
-            onSetCustomCoverUri(selectedGame, uri.toString())
-            selectedGameState.value = null
         }
-    }
 
     Column(
         modifier =

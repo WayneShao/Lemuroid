@@ -226,6 +226,10 @@ abstract class BaseGameActivity : ImmersiveActivity() {
 
     protected abstract fun getDialogClass(): Class<out Activity>
 
+    protected fun requestGameMenu() {
+        baseGameScreenViewModel.requestMenu()
+    }
+
     private fun getCoreOptions(): List<CoreOption> {
         return baseGameScreenViewModel.retroGameView.retroGameView?.getVariables()
             ?.mapNotNull {

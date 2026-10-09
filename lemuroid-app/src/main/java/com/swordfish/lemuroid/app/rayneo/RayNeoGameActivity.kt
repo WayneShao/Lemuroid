@@ -1,5 +1,6 @@
 package com.swordfish.lemuroid.app.rayneo
 
+import android.view.KeyEvent
 import androidx.compose.runtime.Composable
 import com.swordfish.lemuroid.app.mobile.feature.gamemenu.GameMenuActivity
 import com.swordfish.lemuroid.app.shared.game.BaseGameActivity
@@ -21,4 +22,18 @@ class RayNeoGameActivity : BaseGameActivity() {
     }
 
     override fun getDialogClass() = GameMenuActivity::class.java
+
+    override fun onKeyDown(
+        keyCode: Int,
+        event: KeyEvent,
+    ): Boolean = keyCode == KeyEvent.KEYCODE_MENU || super.onKeyDown(keyCode, event)
+
+    override fun onKeyUp(
+        keyCode: Int,
+        event: KeyEvent,
+    ): Boolean {
+        if (keyCode != KeyEvent.KEYCODE_MENU) return super.onKeyUp(keyCode, event)
+        if (!event.isCanceled) requestGameMenu()
+        return true
+    }
 }

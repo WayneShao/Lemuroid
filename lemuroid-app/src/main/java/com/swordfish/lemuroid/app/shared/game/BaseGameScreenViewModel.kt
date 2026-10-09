@@ -237,6 +237,10 @@ class BaseGameScreenViewModel(
         return touchControls.isMenuPressed()
     }
 
+    fun requestMenu() {
+        if (retroGameView.retroGameView != null && !loadingState.value) sideEffects.showMenu(tilt, inputs)
+    }
+
     suspend fun saveSlot(index: Int) {
         if (loadingState.value) return
         withLoading {
