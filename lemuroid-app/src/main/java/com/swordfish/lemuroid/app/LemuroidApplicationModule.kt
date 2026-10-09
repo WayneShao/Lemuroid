@@ -51,6 +51,7 @@ import com.swordfish.lemuroid.lib.core.CoresSelection
 import com.swordfish.lemuroid.lib.game.GameLoader
 import com.swordfish.lemuroid.lib.injection.PerActivity
 import com.swordfish.lemuroid.lib.injection.PerApp
+import com.swordfish.lemuroid.lib.library.covers.CustomCoverManager
 import com.swordfish.lemuroid.lib.library.LemuroidLibrary
 import com.swordfish.lemuroid.lib.library.db.RetrogradeDatabase
 import com.swordfish.lemuroid.lib.library.db.dao.GameSearchDao
@@ -130,6 +131,12 @@ abstract class LemuroidApplicationModule {
 
     @Module
     companion object {
+
+        @Provides
+        @PerApp
+        @JvmStatic
+        fun customCoverManager(context: Context) = CustomCoverManager(context)
+
         @Provides
         @PerApp
         @JvmStatic
@@ -141,7 +148,7 @@ abstract class LemuroidApplicationModule {
         fun retrogradeDb(app: LemuroidApplication) =
             Room.databaseBuilder(app, RetrogradeDatabase::class.java, RetrogradeDatabase.DB_NAME)
                 .addCallback(GameSearchDao.CALLBACK)
-                .addMigrations(GameSearchDao.MIGRATION, Migrations.VERSION_8_9)
+                .addMigrations(GameSearchDao.MIGRATION, Migrations.VERSION_8_9, Migrations.VERSION_9_10)
                 .fallbackToDestructiveMigration()
                 .build()
 
@@ -182,7 +189,8 @@ abstract class LemuroidApplicationModule {
             storageProviderRegistry: Lazy<StorageProviderRegistry>,
             gameMetadataProvider: Lazy<GameMetadataProvider>,
             biosManager: BiosManager,
-        ) = LemuroidLibrary(db, storageProviderRegistry, gameMetadataProvider, biosManager)
+            customCoverManager: CustomCoverManager,
+        ) = LemuroidLibrary(db, storageProviderRegistry, gameMetadataProvider, biosManager, customCoverManager)
 
         @Provides
         @PerApp
