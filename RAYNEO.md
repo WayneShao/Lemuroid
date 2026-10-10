@@ -1,6 +1,6 @@
 # Lemuroid for RayNeo X3 Pro
 
-This fork maintains the RayNeo adaptation on the `rayneo` branch. The upstream project remains Swordfish90/Lemuroid; merge its `master` into the adaptation branch when updating. The current upstream base is `93e321d0` with its pinned cores submodule `fee2e824`. Upstream versionCode is 252 and versionName is 1.17.0. The maintained build is `1.17.0-rayneo.2`; its launcher name is **Lemuroid**. Installable versions are tracked in [GitHub Releases](https://github.com/WayneShao/Lemuroid/releases).
+This fork maintains the RayNeo adaptation on the `rayneo` branch. The upstream project remains Swordfish90/Lemuroid; merge its `master` into the adaptation branch when updating. The current upstream base is `93e321d0` with its pinned cores submodule `fee2e824`. Upstream versionCode is 252 and versionName is 1.17.0. The maintained build is `1.17.0-rayneo.3`; its launcher name is **Lemuroid**. Installable versions are tracked in [GitHub Releases](https://github.com/WayneShao/Lemuroid/releases).
 
 ## Adaptation boundaries
 
@@ -27,10 +27,11 @@ Build and install the freeDynamicDebug variant. Its package is `com.swordfish.le
 
 On the home page, choose the ROM directory. Normal Android devices use the system document picker. On RayNeo firmware without DocumentsUI, the app opens a dual-eye storage page:
 
-1. Reuse the previous local directory, or default to `/sdcard/Games`.
-2. Check actual all-files access. The grant button first opens per-app Settings and falls back to the global all-files Settings page if needed.
-3. Recheck on return and via **Check again**. Denial keeps the recovery page; no directory selection is saved or indexing started.
-4. After access is granted, create a missing directory and confirm it can be listed. Only then save the selection and enqueue indexing once. Settings displays the selected local path.
+1. Open the previously selected folder, or the shared-storage root `/sdcard` if the old folder is missing.
+2. Browse subfolders with the gamepad or right-temple focus controls. **Up**, **Storage root** and Back navigate the folder tree. The path and immediate folder/file counts remain visible in both eyes.
+3. File listing runs off the UI thread. Opening, refreshing, returning from permission Settings or cancelling does not save a new path and does not enqueue scanning.
+4. Choose **Use this directory** to recheck permission and readability, persist the local path, clear the old SAF selection and enqueue indexing once. Empty readable directories are allowed; unreadable paths leave the previous selection intact.
+5. Existing permission grant/retry and ADB recovery remain available. The picker reads folders and does not move or delete ROM files.
 
 The firmware's Settings page is outside Lemuroid's dual-eye window. Where it is difficult to operate, retain the ADB fallback. After selecting the current device and verifying the package/user, for Android user 0:
 
@@ -43,7 +44,7 @@ Return to the app and choose **Check again**. An appop value alone is not proof 
 
 ## Build and verification
 
-See the [2026-10-09 acceptance report](docs/rayneo/2026-10-09-validation.md) for this version, including confirmed input recovery and features whose device acceptance remains open.
+See the [2026-10-10 directory-picker update](docs/rayneo/2026-10-10-directory-picker.md) and [2026-10-09 acceptance report](docs/rayneo/2026-10-09-validation.md) for this version, including confirmed input recovery and features whose device acceptance remains open.
 
 Use JDK 17, the Android SDK, and initialized submodules. Set `JAVA_HOME`, `ANDROID_HOME`/`ANDROID_SDK_ROOT`, or a local `sdk.dir` as appropriate for the host; local machine paths are not committed.
 

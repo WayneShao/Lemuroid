@@ -1,9 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="rayneo_storage_title">游戏目录访问</string>
-    <string name="rayneo_storage_permission_required">读取此目录中的游戏需要“所有文件访问权限”。完成授权后返回此页，即可开始扫描。</string>
-    <string name="rayneo_storage_directory_unavailable">此目录打开或创建失败。请检查目录路径和存储访问权限，然后重试。原来的目录选择已保留。</string>
+    <string name="rayneo_storage_title">选择 ROM 目录</string>
+    <string name="rayneo_storage_permission_required">读取此目录中的游戏需要“所有文件访问权限”。完成授权后返回此页，再选择目录。</string>
+    <string name="rayneo_storage_directory_unavailable">此目录读取失败。请检查目录路径和存储访问权限，然后重试。原来的目录选择已保留。</string>
     <string name="rayneo_storage_settings_unavailable">系统权限设置页未能打开。请通过连接的电脑授予文件访问权限，然后返回此页重新检查。</string>
     <string name="rayneo_storage_grant">授予权限</string>
     <string name="rayneo_storage_retry">重新检查</string>
+    <string name="rayneo_storage_choose">进入目标文件夹，然后选择“使用此目录”。</string>
+    <string name="rayneo_storage_loading">正在读取目录…</string>
+    <string name="rayneo_storage_up">上一级</string>
+    <string name="rayneo_storage_root">存储根目录</string>
+    <string name="rayneo_storage_select">使用此目录</string>
+    <string name="rayneo_storage_no_subfolders">没有子文件夹，可以直接选择此目录。</string>
+    <string name="rayneo_storage_contents">%1$d 个文件夹 · %2$d 个文件（尚未进行 ROM 扫描）</string>
 </resources>

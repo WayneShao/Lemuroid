@@ -1,9 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="rayneo_storage_title">Game directory access</string>
-    <string name="rayneo_storage_permission_required">Allow access to all files to read games from this directory. Return here after granting permission to start scanning.</string>
-    <string name="rayneo_storage_directory_unavailable">This directory could not be opened or created. Check the path and storage access, then retry. Your directory selection has not changed.</string>
+    <string name="rayneo_storage_title">Choose ROM directory</string>
+    <string name="rayneo_storage_permission_required">Allow access to all files to read games from this directory. Return here after granting permission, then choose a directory.</string>
+    <string name="rayneo_storage_directory_unavailable">This directory could not be read. Check the path and storage access, then retry. Your directory selection has not changed.</string>
     <string name="rayneo_storage_settings_unavailable">The system permission page did not open. Grant file access from a connected computer, then return here and check again.</string>
     <string name="rayneo_storage_grant">Grant access</string>
     <string name="rayneo_storage_retry">Check again</string>
+    <string name="rayneo_storage_choose">Open a folder, then select Use this directory.</string>
+    <string name="rayneo_storage_loading">Reading directory…</string>
+    <string name="rayneo_storage_up">Up</string>
+    <string name="rayneo_storage_root">Storage root</string>
+    <string name="rayneo_storage_select">Use this directory</string>
+    <string name="rayneo_storage_no_subfolders">No subfolders. You can select this directory.</string>
+    <string name="rayneo_storage_contents">%1$d folders · %2$d files (before ROM scanning)</string>
 </resources>

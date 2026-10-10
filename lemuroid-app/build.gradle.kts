@@ -100,7 +100,7 @@ android {
         }
         getByName("debug") {
             applicationIdSuffix = ".debug"
-            versionNameSuffix = "-rayneo.2"
+            versionNameSuffix = "-rayneo.3"
             resValue("string", "lemuroid_name", "Lemuroid")
         }
     }
